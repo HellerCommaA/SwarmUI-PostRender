@@ -9,7 +9,7 @@ namespace HellerCommaA.Extensions;
 
 public class PostRenderExtension : Extension
 {
-    private double StepPriority = 10.0f;
+    private double StepPriority = 9.0f;
     private const string FeatureFlagPostRender = "feature_flag_post_render";
 
     #region FilmGrain
@@ -67,6 +67,7 @@ public class PostRenderExtension : Extension
         InstallableFeatures.RegisterInstallableFeature(new("ProPost", FeatureFlagPostRender, "https://github.com/digitaljohn/comfyui-propost", "digitaljohn", "This will install ProPost nodes developed by digitaljohn\nDo you wish to install?"));
         ScriptFiles.Add("assets/pro_post.js");
 
+        // reactor is 9.0, lets list as after
         double orderPriorityCtr = 9.1;
 
         ComfyUIBackendExtension.NodeToFeatureMap[NodeNameFilmGrain] = FeatureFlagPostRender;
@@ -168,22 +169,25 @@ public class PostRenderExtension : Extension
             {
                 return;
             }
-
-            string filmNode = g.CreateNode(NodeNameFilmGrain, new JObject
+            // only try one of these, if we have one we have them all
+            if (g.UserInput.TryGet(FGGrayScale, out bool grayScale))
             {
-                ["image"] = g.FinalImageOut,
-                ["gray_scale"] = g.UserInput.Get(FGGrayScale),
-                ["grain_type"] = g.UserInput.Get(FGGrainType),
-                ["grain_sat"] = g.UserInput.Get(FGGrainSat),
-                ["grain_power"] = g.UserInput.Get(FGGrainPower),
-                ["shadows"] = g.UserInput.Get(FGShadows),
-                ["highs"] = g.UserInput.Get(FGHighs),
-                ["scale"] = g.UserInput.Get(FGScale),
-                ["sharpen"] = g.UserInput.Get(FGSharpen),
-                ["src_gamma"] = g.UserInput.Get(FGSrcGamma),
-                ["seed"] = g.UserInput.Get(FGSeed),
-            });
-            g.FinalImageOut = [filmNode, 0];
+                string filmNode = g.CreateNode(NodeNameFilmGrain, new JObject
+                {
+                    ["image"] = g.FinalImageOut,
+                    ["gray_scale"] = grayScale,
+                    ["grain_type"] = g.UserInput.Get(FGGrainType),
+                    ["grain_sat"] = g.UserInput.Get(FGGrainSat),
+                    ["grain_power"] = g.UserInput.Get(FGGrainPower),
+                    ["shadows"] = g.UserInput.Get(FGShadows),
+                    ["highs"] = g.UserInput.Get(FGHighs),
+                    ["scale"] = g.UserInput.Get(FGScale),
+                    ["sharpen"] = g.UserInput.Get(FGSharpen),
+                    ["src_gamma"] = g.UserInput.Get(FGSrcGamma),
+                    ["seed"] = g.UserInput.Get(FGSeed),
+                });
+                g.FinalImageOut = [filmNode, 0];
+            }
         }, StepPriority);
         StepPriority += 0.1f;
         #endregion
@@ -225,14 +229,17 @@ public class PostRenderExtension : Extension
             {
                 return;
             }
-            string vigNode = g.CreateNode(NodeNameVignette, new JObject
+            if (g.UserInput.TryGet(VStrength, out float vStr))
             {
-                ["image"] = g.FinalImageOut,
-                ["intensity"] = g.UserInput.Get(VStrength),
-                ["center_x"] = g.UserInput.Get(VPosX),
-                ["center_y"] = g.UserInput.Get(VPosY),
-            });
-            g.FinalImageOut = [vigNode, 0];
+                string vigNode = g.CreateNode(NodeNameVignette, new JObject
+                {
+                    ["image"] = g.FinalImageOut,
+                    ["intensity"] = vStr,
+                    ["center_x"] = g.UserInput.Get(VPosX),
+                    ["center_y"] = g.UserInput.Get(VPosY),
+                });
+                g.FinalImageOut = [vigNode, 0];
+            }
         }, StepPriority);
         StepPriority += 0.1f;
         #endregion
@@ -294,16 +301,19 @@ public class PostRenderExtension : Extension
             {
                 return;
             }
-            string blurNode = g.CreateNode(NodeNameRadialBlur, new JObject
+            if (g.UserInput.TryGet(RBStrength, out float bStr))
             {
-                ["image"] = g.FinalImageOut,
-                ["blur_strength"] = g.UserInput.Get(RBStrength),
-                ["center_x"] = g.UserInput.Get(RBPosX),
-                ["center_y"] = g.UserInput.Get(RBPosY),
-                ["focus_spread"] = g.UserInput.Get(RBFocusSpread),
-                ["steps"] = g.UserInput.Get(RBSteps),
-            });
-            g.FinalImageOut = [blurNode, 0];
+                string blurNode = g.CreateNode(NodeNameRadialBlur, new JObject
+                {
+                    ["image"] = g.FinalImageOut,
+                    ["blur_strength"] = bStr,
+                    ["center_x"] = g.UserInput.Get(RBPosX),
+                    ["center_y"] = g.UserInput.Get(RBPosY),
+                    ["focus_spread"] = g.UserInput.Get(RBFocusSpread),
+                    ["steps"] = g.UserInput.Get(RBSteps),
+                });
+                g.FinalImageOut = [blurNode, 0];
+            }
         }, StepPriority);
         StepPriority += 0.1f;
         #endregion
@@ -348,14 +358,17 @@ public class PostRenderExtension : Extension
             {
                 return;
             }
-            string lutNode = g.CreateNode(NodeNameLut, new JObject
+            if (g.UserInput.TryGet(LutName, out string lName))
             {
-                ["image"] = g.FinalImageOut,
-                ["lut_name"] = g.UserInput.Get(LutName),
-                ["log"] = g.UserInput.Get(LutLogSpace),
-                ["strength"] = g.UserInput.Get(LutStrength),
-            });
-            g.FinalImageOut = [lutNode, 0];
+                string lutNode = g.CreateNode(NodeNameLut, new JObject
+                {
+                    ["image"] = g.FinalImageOut,
+                    ["lut_name"] = lName,
+                    ["log"] = g.UserInput.Get(LutLogSpace),
+                    ["strength"] = g.UserInput.Get(LutStrength),
+                });
+                g.FinalImageOut = [lutNode, 0];
+            }
         }, StepPriority);
         StepPriority += 0.1f;
         #endregion

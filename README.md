@@ -20,7 +20,7 @@ LUTs are stored in SwarmUI/Models/luts
 2. Open a cmd/terminal window in `SwarmUI\src\Extensions`
 3. Run `git clone https://github.com/HellerCommaA/SwarmUI-PostRender.git`
 4. Run `SwarmUI\update-windows.bat` to recompile SwarmUI
-5. Launch SwarmUI as usual, if the ProPost nodes are installed you should see parameter groups for them in the generate tab, if not follow the steps 6.
+5. Launch SwarmUI as usual, if the ProPost nodes are installed you should see parameter groups for them in the generate tab, if not go to step 6.
 6. Expand the `Film Grain` group and click `Install ProPost Nodes`. Click OK to confirm. then once the install is finished, restart SwarmUI.
 
 ## Updating
