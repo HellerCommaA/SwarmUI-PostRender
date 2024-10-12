@@ -9,14 +9,6 @@ namespace HellerCommaA.Extensions;
  * https://github.com/Quaggles/SwarmUI-FaceTools/blob/master/Utils.cs
 **/
 
-class Utils {
-    public static double STEP_ORDER_RADIAL_BLUR = 9.7f;
-    public static double STEP_ORDER_FILM_GRAIN = 9.8f;
-    public static double STEP_ORDER_VIG = 9.9f;
-    public static double STEP_ORDER_LUT = 9.99f;
-}
-
-
 public struct ModelHelper
 {
     public readonly string Subfolder;
