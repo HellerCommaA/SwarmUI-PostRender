@@ -1,10 +1,12 @@
 
+using Hardware.Info;
 using Newtonsoft.Json.Linq;
 using SwarmUI.Builtin_ComfyUIBackend;
 using SwarmUI.Core;
 using SwarmUI.Text2Image;
 using SwarmUI.Utils;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace HellerCommaA.Extensions;
 
@@ -78,7 +80,8 @@ public class PostRenderExtension : Extension
     public override void OnInit()
     {
         base.OnInit();
-
+        Directory.CreateDirectory($"{Program.ServerSettings.Paths.ActualModelRoot}{Path.DirectorySeparatorChar}luts");
+        string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, "luts");
         ComfyUISelfStartBackend.FoldersToForwardInComfyPath.Add("luts");
 
         InstallableFeatures.RegisterInstallableFeature(new("ProPost", FeatureFlagPostRender, "https://github.com/digitaljohn/comfyui-propost", "digitaljohn", "This will install ProPost nodes developed by digitaljohn\nDo you wish to install?"));
@@ -89,7 +92,6 @@ public class PostRenderExtension : Extension
         }
         ScriptFiles.Add("assets/pro_post.js");
 
-        string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, "luts");
         T2IParamTypes.ConcatDropdownValsClean(ref LutModels,
             [.. Directory.EnumerateFiles(path, "*.cube", SearchOption.AllDirectories).Select(f => Path.GetRelativePath(path, f))]
         );

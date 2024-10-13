@@ -16,6 +16,11 @@ LUTs are stored in SwarmUI/Models/luts
 
 ## Installation
 
+#### Automatic Install (suggested):
+1. Select the extension in the Server -> Extensions tab and click 'Install'
+The extension will be kept up to date when `update-(your platform)` is run
+
+#### Manual Install (not suggested):
 1. Shutdown SwarmUI
 2. Open a cmd/terminal window in `SwarmUI\src\Extensions`
 3. Run `git clone https://github.com/HellerCommaA/SwarmUI-PostRender.git`
