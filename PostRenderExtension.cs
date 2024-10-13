@@ -68,7 +68,12 @@ public class PostRenderExtension : Extension
         ComfyUISelfStartBackend.FoldersToForwardInComfyPath.Add("luts");
 
         InstallableFeatures.RegisterInstallableFeature(new("ProPost", FeatureFlagPostRender, "https://github.com/digitaljohn/comfyui-propost", "digitaljohn", "This will install ProPost nodes developed by digitaljohn\nDo you wish to install?"));
-        ScriptFiles.Add("assets/pro_post.js");
+        if (Directory.Exists(Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, $"{ComfyUIBackendExtension.Folder}/DLNodes/comfyui-propost")))
+        {
+            ComfyUIBackendExtension.FeaturesSupported.UnionWith([FeatureFlagPostRender]);
+            ComfyUIBackendExtension.FeaturesDiscardIfNotFound.UnionWith([FeatureFlagPostRender]);
+        }
+        ScriptFiles.Add("assets/prot_post.js");
 
         string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, "luts");
         T2IParamTypes.ConcatDropdownValsClean(ref LutModels,
