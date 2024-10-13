@@ -55,6 +55,12 @@ public class PostRenderExtension : Extension
     public T2IRegisteredParam<int> RBSteps;
     #endregion
 
+
+    public override void OnPreLaunch()
+    {
+        base.OnPreLaunch();
+
+    }
     public override void OnInit()
     {
         base.OnInit();
@@ -63,6 +69,11 @@ public class PostRenderExtension : Extension
 
         InstallableFeatures.RegisterInstallableFeature(new("ProPost", FeatureFlagPostRender, "https://github.com/digitaljohn/comfyui-propost", "digitaljohn", "This will install ProPost nodes developed by digitaljohn\nDo you wish to install?"));
         ScriptFiles.Add("assets/pro_post.js");
+
+        string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, "luts");
+        T2IParamTypes.ConcatDropdownValsClean(ref LutModels,
+            [.. Directory.EnumerateFiles(path, "*.cube", SearchOption.AllDirectories).Select(f => Path.GetRelativePath(path, f))]
+        );
 
         ComfyUIBackendExtension.RawObjectInfoParsers.Add(rawObjectInfo =>
         {
