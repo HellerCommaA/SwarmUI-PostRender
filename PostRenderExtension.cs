@@ -3,59 +3,55 @@ using Newtonsoft.Json.Linq;
 using SwarmUI.Builtin_ComfyUIBackend;
 using SwarmUI.Core;
 using SwarmUI.Text2Image;
+using SwarmUI.Utils;
 using System.IO;
 
 namespace HellerCommaA.Extensions;
 
 public class PostRenderExtension : Extension
 {
-    private double StepPriority = 9.0f;
-    private const string FeatureFlagPostRender = "feature_flag_post_render";
+    public double StepPriority = 9.0f;
+    public const string FeatureFlagPostRender = "feature_flag_post_render";
 
     #region FilmGrain
-    private const string FILM_GRAIN_PREFIX = "[Grain]";
-    private const string NodeNameFilmGrain = "ProPostFilmGrain";
-    private T2IRegisteredParam<bool> FGGrayScale;
-    private T2IRegisteredParam<string> FGGrainType;
-    private T2IRegisteredParam<float> FGGrainSat;
-    private T2IRegisteredParam<float> FGGrainPower;
-    private T2IRegisteredParam<float> FGShadows;
-    private T2IRegisteredParam<float> FGHighs;
-    private T2IRegisteredParam<float> FGScale;
-    private T2IRegisteredParam<int> FGSharpen;
-    private T2IRegisteredParam<float> FGSrcGamma;
-    private T2IRegisteredParam<long> FGSeed;
+    public const string FILM_GRAIN_PREFIX = "[Grain]";
+    public const string NodeNameFilmGrain = "ProPostFilmGrain";
+    public T2IRegisteredParam<bool> FGGrayScale;
+    public T2IRegisteredParam<string> FGGrainType;
+    public T2IRegisteredParam<float> FGGrainSat;
+    public T2IRegisteredParam<float> FGGrainPower;
+    public T2IRegisteredParam<float> FGShadows;
+    public T2IRegisteredParam<float> FGHighs;
+    public T2IRegisteredParam<float> FGScale;
+    public T2IRegisteredParam<int> FGSharpen;
+    public T2IRegisteredParam<float> FGSrcGamma;
+    public T2IRegisteredParam<long> FGSeed;
     #endregion
 
     #region Vignette
-    private const string VIGNETTE_PREFIX = "[Vig]";
-    private const string NodeNameVignette = "ProPostVignette";
-    private T2IRegisteredParam<float> VStrength;
-    private T2IRegisteredParam<float> VPosX;
-    private T2IRegisteredParam<float> VPosY;
+    public const string VIGNETTE_PREFIX = "[Vig]";
+    public const string NodeNameVignette = "ProPostVignette";
+    public T2IRegisteredParam<float> VStrength;
+    public T2IRegisteredParam<float> VPosX;
+    public T2IRegisteredParam<float> VPosY;
     #endregion
 
     #region Lut
-    private const string LUT_PREFIX = "[LUT]";
-    private ModelHelper lutHelper = new("luts")
-    {
-        Default = "None",
-        Filter = model => string.Equals(Path.GetExtension(model), ".cube", StringComparison.OrdinalIgnoreCase)
-    };
-    private const string NodeNameLut = "ProPostApplyLUT";
-    private T2IRegisteredParam<float> LutStrength;
-    private T2IRegisteredParam<bool> LutLogSpace;
-    private T2IRegisteredParam<string> LutName;
+    public const string LUT_PREFIX = "[LUT]";
+    public const string NodeNameLut = "ProPostApplyLUT";
+    public T2IRegisteredParam<float> LutStrength;
+    public T2IRegisteredParam<bool> LutLogSpace;
+    public T2IRegisteredParam<string> LutName;
     #endregion
 
     #region RadialBlur
-    private const string R_BLUR_PREFIX = "[R. Blur]";
-    private const string NodeNameRadialBlur = "ProPostRadialBlur";
-    private T2IRegisteredParam<float> RBStrength;
-    private T2IRegisteredParam<float> RBPosX;
-    private T2IRegisteredParam<float> RBPosY;
-    private T2IRegisteredParam<float> RBFocusSpread;
-    private T2IRegisteredParam<int> RBSteps;
+    public const string R_BLUR_PREFIX = "[R. Blur]";
+    public const string NodeNameRadialBlur = "ProPostRadialBlur";
+    public T2IRegisteredParam<float> RBStrength;
+    public T2IRegisteredParam<float> RBPosX;
+    public T2IRegisteredParam<float> RBPosY;
+    public T2IRegisteredParam<float> RBFocusSpread;
+    public T2IRegisteredParam<int> RBSteps;
     #endregion
 
     public override void OnInit()
@@ -165,13 +161,13 @@ public class PostRenderExtension : Extension
         ));
         WorkflowGenerator.AddStep(g =>
         {
-            if (!ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureFlagPostRender))
-            {
-                return;
-            }
             // only try one of these, if we have one we have them all
             if (g.UserInput.TryGet(FGGrayScale, out bool grayScale))
             {
+                if (!g.Features.Contains(FeatureFlagPostRender))
+                {
+                    throw new SwarmUserErrorException("Post Render parameters specified, but feature isn't installed");
+                }
                 string filmNode = g.CreateNode(NodeNameFilmGrain, new JObject
                 {
                     ["image"] = g.FinalImageOut,
@@ -225,12 +221,12 @@ public class PostRenderExtension : Extension
         ));
         WorkflowGenerator.AddStep(g =>
         {
-            if (!ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureFlagPostRender))
-            {
-                return;
-            }
             if (g.UserInput.TryGet(VStrength, out float vStr))
             {
+                if (!g.Features.Contains(FeatureFlagPostRender))
+                {
+                    throw new SwarmUserErrorException("Post Render parameters specified, but feature isn't installed");
+                }
                 string vigNode = g.CreateNode(NodeNameVignette, new JObject
                 {
                     ["image"] = g.FinalImageOut,
@@ -297,12 +293,12 @@ public class PostRenderExtension : Extension
 
         WorkflowGenerator.AddStep(g =>
         {
-            if (!ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureFlagPostRender))
-            {
-                return;
-            }
             if (g.UserInput.TryGet(RBStrength, out float bStr))
             {
+                if (!g.Features.Contains(FeatureFlagPostRender))
+                {
+                    throw new SwarmUserErrorException("Post Render parameters specified, but feature isn't installed");
+                }
                 string blurNode = g.CreateNode(NodeNameRadialBlur, new JObject
                 {
                     ["image"] = g.FinalImageOut,
@@ -326,10 +322,15 @@ public class PostRenderExtension : Extension
 
         LutName = T2IParamTypes.Register<string>(new($"{LUT_PREFIX} Name",
             "LUT to apply to the image.\n" +
-            $"To add new LUTs place them in SwarmUI/Models/{lutHelper.Subfolder}",
-            lutHelper.GetDefault(),
+            $"To add new LUTs place them in SwarmUI/Models/luts",
+            "None",
             IgnoreIf: "None",
-            GetValues: _ => lutHelper.GetValues(),
+            GetValues: _ =>
+            {
+                string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, "luts");
+
+                return [.. Directory.EnumerateFiles(path, "*.cube", SearchOption.AllDirectories).Select(f => Path.GetRelativePath(path, f))];
+            },
             Group: lutGroup,
             FeatureFlag: FeatureFlagPostRender,
             OrderPriority: orderCounter++
@@ -354,12 +355,12 @@ public class PostRenderExtension : Extension
 
         WorkflowGenerator.AddStep(g =>
         {
-            if (!ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureFlagPostRender))
-            {
-                return;
-            }
             if (g.UserInput.TryGet(LutName, out string lName))
             {
+                if (!g.Features.Contains(FeatureFlagPostRender))
+                {
+                    throw new SwarmUserErrorException("Post Render parameters specified, but feature isn't installed");
+                }
                 string lutNode = g.CreateNode(NodeNameLut, new JObject
                 {
                     ["image"] = g.FinalImageOut,
