@@ -55,6 +55,20 @@ public class PostRenderExtension : Extension
     public T2IRegisteredParam<int> RBSteps;
     #endregion
 
+    #region DMBlur
+    public const string DM_BLUR_PREFIX = "[DM Blur]";
+    public const string NodeNameDMBlur = "ProPostDepthMapBlur";
+    public const string NodeNameDepthMap = "DepthAnythingPreprocessor";
+    public List<string> DepthModels = ["depth_anything_vitl14.pth", "depth_anything_vitb14.pth", "depth_anything_vits14.pth"];
+    public T2IRegisteredParam<string> DMPreProcessorResolution;
+    public T2IRegisteredParam<string> DMPreProcessorModelName;
+    public T2IRegisteredParam<float> DMBlurStrength;
+    public T2IRegisteredParam<float> DMFocalDepth;
+    public T2IRegisteredParam<float> DMFocusSpread;
+    public T2IRegisteredParam<int> DMSteps;
+    public T2IRegisteredParam<float> DMFocalRange;
+    public T2IRegisteredParam<int> DMMaskBlur;
+    #endregion
 
     public override void OnPreLaunch()
     {
@@ -260,6 +274,115 @@ public class PostRenderExtension : Extension
                     ["center_y"] = g.UserInput.Get(VPosY),
                 });
                 g.FinalImageOut = [vigNode, 0];
+            }
+        }, StepPriority);
+        StepPriority += 0.1f;
+        #endregion
+
+        orderCounter = 0;
+
+        #region DMBlur
+        T2IParamGroup DMBlurGroup = new("Depth Map Blur", Toggles: true, Open: false, IsAdvanced: false, OrderPriority: orderPriorityCtr);
+        orderPriorityCtr += 0.1f;
+
+        DMPreProcessorResolution = T2IParamTypes.Register<string>(new($"{DM_BLUR_PREFIX} Depth Map Resolution",
+            "The resolution of the depth map (1024 suggested)",
+            "1024",
+            GetValues: _ => ["256", "512", "1024", "2048"],
+            Group: DMBlurGroup,
+            FeatureFlag: FeatureFlagPostRender,
+            OrderPriority: orderCounter++
+        ));
+        DMPreProcessorModelName = T2IParamTypes.Register<string>(new($"{DM_BLUR_PREFIX} Depth Model",
+            "The model used for the depth map image\nModels will download automatically as needed",
+            DepthModels[0],
+            GetValues: _ => DepthModels,
+            Group: DMBlurGroup,
+            FeatureFlag: FeatureFlagPostRender,
+            OrderPriority: orderCounter++
+        ));
+        DMBlurStrength = T2IParamTypes.Register<float>(new($"{DM_BLUR_PREFIX} Blur Strength",
+            "The intensity of the blur",
+            "64.0",
+            Min: 0.0, Max: 256.0, Step: 1.0,
+            ViewType: ParamViewType.SLIDER,
+            Group: DMBlurGroup,
+            FeatureFlag: FeatureFlagPostRender,
+            OrderPriority: orderCounter++
+        ));
+        DMFocalDepth = T2IParamTypes.Register<float>(new($"{DM_BLUR_PREFIX} Focal Depth",
+            "The focal depth of the blur. 1.0 is the closest, 0.0 is the farthest",
+            "1.0",
+            Min: 0.0, Max: 1.0, Step: 0.01,
+            ViewType: ParamViewType.SLIDER,
+            Group: DMBlurGroup,
+            FeatureFlag: FeatureFlagPostRender,
+            OrderPriority: orderCounter++
+        ));
+        DMFocusSpread = T2IParamTypes.Register<float>(new($"{DM_BLUR_PREFIX} Focus Spread",
+            "The spread of the area of focus. A larger value makes more of the image sharp",
+            "1.0",
+            Min: 1.0, Max: 8.0, Step: 0.1,
+            ViewType: ParamViewType.SLIDER,
+            Group: DMBlurGroup,
+            FeatureFlag: FeatureFlagPostRender,
+            OrderPriority: orderCounter++
+        ));
+        DMSteps = T2IParamTypes.Register<int>(new($"{DM_BLUR_PREFIX} Steps",
+            "The number of steps to use when blurring the image. Higher numbers are slower",
+            "5",
+            Min: 1, Max: 32, Step: 1,
+            ViewType: ParamViewType.SLIDER,
+            Group: DMBlurGroup,
+            FeatureFlag: FeatureFlagPostRender,
+            OrderPriority: orderCounter++
+        ));
+        DMFocalRange = T2IParamTypes.Register<float>(new($"{DM_BLUR_PREFIX} Focal Range",
+            "1.0 means all areas clear, 0.0 means only focal point is clear",
+            "0.0",
+            Min: 0.0, Max: 1.0, Step: 0.01,
+            ViewType: ParamViewType.SLIDER,
+            Group: DMBlurGroup,
+            FeatureFlag: FeatureFlagPostRender,
+            OrderPriority: orderCounter++
+        ));
+        DMMaskBlur = T2IParamTypes.Register<int>(new($"{DM_BLUR_PREFIX} Mask Blur",
+            "Mask blur strength (1 to 127).1 means no blurring",
+            "1",
+            Min: 1, Max: 127, Step: 2,
+            ViewType: ParamViewType.SLIDER,
+            Group: DMBlurGroup,
+            FeatureFlag: FeatureFlagPostRender,
+            OrderPriority: orderCounter++
+        ));
+
+        WorkflowGenerator.AddStep(g =>
+        {
+            if (g.UserInput.TryGet(DMBlurStrength, out float bStr))
+            {
+                if (!g.Features.Contains(FeatureFlagPostRender))
+                {
+                    throw new SwarmUserErrorException("Post Render parameters specified, but feature isn't installed");
+                }
+                string depthAnything = g.CreateNode(NodeNameDepthMap, new JObject
+                {
+                    ["image"] = g.FinalImageOut,
+                    ["resolution"] = Int32.Parse(g.UserInput.Get(DMPreProcessorResolution)),
+                    ["ckpt_name"] = g.UserInput.Get(DMPreProcessorModelName),
+                });
+                JArray map = [depthAnything, 0];
+                string blurNode = g.CreateNode(NodeNameDMBlur, new JObject
+                {
+                    ["image"] = g.FinalImageOut,
+                    ["depth_map"] = map,
+                    ["blur_strength"] = g.UserInput.Get(DMBlurStrength),
+                    ["focal_depth"] = g.UserInput.Get(DMFocalDepth),
+                    ["focus_spread"] = g.UserInput.Get(DMFocusSpread),
+                    ["steps"] = g.UserInput.Get(DMSteps),
+                    ["focal_range"] = g.UserInput.Get(DMFocalRange),
+                    ["mask_blur"] = g.UserInput.Get(DMMaskBlur),
+                });
+                g.FinalImageOut = [blurNode, 0];
             }
         }, StepPriority);
         StepPriority += 0.1f;

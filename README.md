@@ -9,7 +9,7 @@ Most notably, LUTs are able to be applied during an image generation. If you're 
 *** Shout out to Quaggles for their excellent work on [SwarmUI-FaceTools](https://github.com/Quaggles/SwarmUI-FaceTools/tree/master) who I lifted a lot of this work from ***
 
 ## Roadmap
-1. Implement Depth Map Blur
+1. All nodes are implemented, bug fixes
 
 ## Notes
 LUTs are stored in SwarmUI/Models/luts
