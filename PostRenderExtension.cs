@@ -334,12 +334,7 @@ public class PostRenderExtension : Extension
             $"To add new LUTs place them in SwarmUI/Models/luts",
             "None",
             IgnoreIf: "None",
-            GetValues: _ =>
-            {
-                string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, "luts");
-
-                return [.. Directory.EnumerateFiles(path, "*.cube", SearchOption.AllDirectories).Select(f => Path.GetRelativePath(path, f))];
-            },
+            GetValues: _ => LutModels,
             Group: lutGroup,
             FeatureFlag: FeatureFlagPostRender,
             OrderPriority: orderCounter++
