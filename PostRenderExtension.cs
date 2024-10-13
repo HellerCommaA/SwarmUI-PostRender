@@ -39,6 +39,7 @@ public class PostRenderExtension : Extension
     #region Lut
     public const string LUT_PREFIX = "[LUT]";
     public const string NodeNameLut = "ProPostApplyLUT";
+    public List<string> LutModels = [];
     public T2IRegisteredParam<float> LutStrength;
     public T2IRegisteredParam<bool> LutLogSpace;
     public T2IRegisteredParam<string> LutName;
@@ -62,6 +63,14 @@ public class PostRenderExtension : Extension
 
         InstallableFeatures.RegisterInstallableFeature(new("ProPost", FeatureFlagPostRender, "https://github.com/digitaljohn/comfyui-propost", "digitaljohn", "This will install ProPost nodes developed by digitaljohn\nDo you wish to install?"));
         ScriptFiles.Add("assets/pro_post.js");
+
+        ComfyUIBackendExtension.RawObjectInfoParsers.Add(rawObjectInfo =>
+        {
+            if (rawObjectInfo.TryGetValue("ProPostApplyLUT", out JToken lutNode))
+            {
+                T2IParamTypes.ConcatDropdownValsClean(ref LutModels, lutNode["input"]["required"]["lut_name"][0].Select(m => $"{m}"));
+            }
+        });
 
         // reactor is 9.0, lets list as after
         double orderPriorityCtr = 9.1;
