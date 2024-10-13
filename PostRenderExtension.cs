@@ -73,7 +73,7 @@ public class PostRenderExtension : Extension
             ComfyUIBackendExtension.FeaturesSupported.UnionWith([FeatureFlagPostRender]);
             ComfyUIBackendExtension.FeaturesDiscardIfNotFound.UnionWith([FeatureFlagPostRender]);
         }
-        ScriptFiles.Add("assets/prot_post.js");
+        ScriptFiles.Add("assets/pro_post.js");
 
         string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, "luts");
         T2IParamTypes.ConcatDropdownValsClean(ref LutModels,
