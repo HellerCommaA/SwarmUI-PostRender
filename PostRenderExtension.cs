@@ -12,7 +12,7 @@ namespace HellerCommaA.Extensions;
 
 public class PostRenderExtension : Extension
 {
-    public double StepPriority = 9.0f;
+    public double StepPriority = 9.9f;
     public const string FeatureFlagPostRender = "feature_flag_post_render";
 
     #region FilmGrain
