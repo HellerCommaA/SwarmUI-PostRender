@@ -226,7 +226,7 @@ public class PostRenderExtension : Extension
                 g.FinalImageOut = [filmNode, 0];
             }
         }, StepPriority);
-        StepPriority += 0.1f;
+        StepPriority += 0.01f;
         #endregion
 
         orderCounter = 0;
@@ -278,7 +278,7 @@ public class PostRenderExtension : Extension
                 g.FinalImageOut = [vigNode, 0];
             }
         }, StepPriority);
-        StepPriority += 0.1f;
+        StepPriority += 0.01f;
         #endregion
 
         orderCounter = 0;
@@ -387,7 +387,7 @@ public class PostRenderExtension : Extension
                 g.FinalImageOut = [blurNode, 0];
             }
         }, StepPriority);
-        StepPriority += 0.1f;
+        StepPriority += 0.01f;
         #endregion
 
         orderCounter = 0;
@@ -461,7 +461,7 @@ public class PostRenderExtension : Extension
                 g.FinalImageOut = [blurNode, 0];
             }
         }, StepPriority);
-        StepPriority += 0.1f;
+        StepPriority += 0.01f;
         #endregion
 
         orderCounter = 0;
@@ -516,7 +516,7 @@ public class PostRenderExtension : Extension
                 g.FinalImageOut = [lutNode, 0];
             }
         }, StepPriority);
-        StepPriority += 0.1f;
+        StepPriority += 0.01f;
         #endregion
 
         orderCounter = 0;
