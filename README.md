@@ -19,6 +19,7 @@ LUTs are stored in SwarmUI/Models/luts
 #### Automatic Install (suggested):
 1. Select the extension in the Server -> Extensions tab and click 'Install'
 The extension will be kept up to date when `update-(your platform)` is run
+2. Be sure you have gone to the Generate tab then expanded the `ControlNet` group and clicked `Install` there as well!
 
 #### Manual Install (not suggested):
 1. Shutdown SwarmUI
