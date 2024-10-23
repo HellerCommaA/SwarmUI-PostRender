@@ -80,8 +80,8 @@ public class PostRenderExtension : Extension
     public override void OnInit()
     {
         base.OnInit();
-        Directory.CreateDirectory($"{Program.ServerSettings.Paths.ActualModelRoot}{Path.DirectorySeparatorChar}luts");
         string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, "luts");
+        Directory.CreateDirectory(path);
         ComfyUISelfStartBackend.FoldersToForwardInComfyPath.Add("luts");
 
         InstallableFeatures.RegisterInstallableFeature(new("ProPost", FeatureFlagPostRender, "https://github.com/digitaljohn/comfyui-propost", "digitaljohn", "This will install ProPost nodes developed by digitaljohn\nDo you wish to install?"));
