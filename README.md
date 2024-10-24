@@ -12,7 +12,8 @@ Most notably, LUTs are able to be applied during an image generation. If you're 
 1. All nodes are implemented, bug fixes
 
 ## Notes
-LUTs are stored in SwarmUI/Models/luts
+LUTs are stored in SwarmUI/Models/luts, **however, until a bug is fixed, LUTs must also be placed in SwarmUI/dlbackend/comfy/ComfyUI/models/luts/**
+Yes it's annoying and sorry. I have a potential fix, but I'll have to fork comfyui-propost to fix it.
 
 ## Installation
 
