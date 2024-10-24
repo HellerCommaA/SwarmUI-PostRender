@@ -77,18 +77,29 @@ public class PostRenderExtension : Extension
         base.OnPreLaunch();
 
     }
-    public override void OnInit()
+    public override async void OnInit()
     {
         base.OnInit();
         string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, "luts");
         Directory.CreateDirectory(path);
         ComfyUISelfStartBackend.FoldersToForwardInComfyPath.Add("luts");
 
-        InstallableFeatures.RegisterInstallableFeature(new("ProPost", FeatureFlagPostRender, "https://github.com/digitaljohn/comfyui-propost", "digitaljohn", "This will install ProPost nodes developed by digitaljohn\nDo you wish to install?"));
-        if (Directory.Exists(Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, $"{ComfyUIBackendExtension.Folder}/DLNodes/comfyui-propost")))
+        const string remoteGit = "https://github.com/HellerCommaA/comfyui-propost";
+        InstallableFeatures.RegisterInstallableFeature(new("ProPost", FeatureFlagPostRender, remoteGit, "HellerCommaA", "This will install ProPost nodes.\nDo you wish to install?"));
+        string extensionPath = Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, $"{ComfyUIBackendExtension.Folder}/DLNodes/comfyui-propost");
+        if (Directory.Exists(extensionPath))
         {
-            ComfyUIBackendExtension.FeaturesSupported.UnionWith([FeatureFlagPostRender]);
-            ComfyUIBackendExtension.FeaturesDiscardIfNotFound.UnionWith([FeatureFlagPostRender]);
+            // fix previously downloaded extension, since we switched repos branches
+            string remote = await Utilities.RunGitProcess($"remote -v", extensionPath);
+            if (remote.Contains("digitaljohn", StringComparison.OrdinalIgnoreCase))
+            {
+                await Utilities.RunGitProcess($"remote set-url origin {remoteGit}.git", extensionPath);
+            }
+            else
+            {
+                ComfyUIBackendExtension.FeaturesSupported.UnionWith([FeatureFlagPostRender]);
+                ComfyUIBackendExtension.FeaturesDiscardIfNotFound.UnionWith([FeatureFlagPostRender]);
+            }
         }
         ScriptFiles.Add("assets/pro_post.js");
 
